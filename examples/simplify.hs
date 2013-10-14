@@ -6,10 +6,6 @@
  and unshared terms are folded into the parent by
  changing the type of the graph to use the free
  monad (Free e) over the original functor e.
-
- This example depends on the "free" package for the
- definition of free monads. The language extensions are
- used only to define the type for the example terms.
  -}
 -- to define simplification
 import Data.Foldable(Foldable,foldMap)
