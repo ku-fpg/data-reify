@@ -1,14 +1,12 @@
 {-# LANGUAGE TypeFamilies, DeriveDataTypeable #-}
-module Main where
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Main (main) where
 
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
-import Data.Monoid
 import Control.Applicative hiding (Const)
-import Data.Reify
-import Data.Dynamic
 
-import Control.Monad
+import Data.Dynamic
+import Data.Reify
+
 import System.CPUTime
 
 data List a b = Nil | Cons a b
@@ -18,13 +16,14 @@ instance Typeable a => MuRef [a] where
   type DeRef [a] = List a 
 
   mapDeRef f (x:xs) = Cons x <$> f xs
-  mapDeRef f []     = pure Nil
+  mapDeRef _ []     = pure Nil
 
 
 instance Functor (List a) where
-   fmap f Nil = Nil
+   fmap _ Nil = Nil
    fmap f (Cons a b) = Cons a (f b)
 
+main :: IO ()
 main = do
         let g1 = [1..(10::Int)]
         reifyGraph g1 >>= print
@@ -41,7 +40,7 @@ timeme n = do
         let g3 = [1..n] ++ g3
         reifyGraph g3 >>= \ (Graph xs _) -> putStr $ show (length xs)
         j <- getCPUTime
-        let n :: Float
-            n = fromIntegral ((j - i) `div` 1000000000)
-        putStrLn $ " ==> " ++ show (n / 1000)   
-        return n    
+        let n' :: Float
+            n' = fromIntegral ((j - i) `div` 1000000000)
+        putStrLn $ " ==> " ++ show (n' / 1000)   
+        return n'

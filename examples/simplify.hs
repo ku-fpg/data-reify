@@ -7,23 +7,38 @@
  changing the type of the graph to use the free
  monad (Free e) over the original functor e.
  -}
+module Main (main) where
+
 -- to define simplification
-import Data.Foldable(Foldable,foldMap)
-import Data.Monoid(Monoid(mempty,mappend,mconcat),(<>))
-import Data.Map.Strict (Map)
+import           Control.Applicative (Applicative(..))
+import           Data.Foldable (Foldable,foldMap)
+import           Data.Functor ((<$>))
+import           Data.Monoid (Monoid(..), (<>))
 import qualified Data.Map.Strict as Map
+import           Data.Map.Strict (Map)
+import           Data.Reify (Graph(Graph), Unique)
 import qualified Data.Set as Set
 
-import Data.Reify(Graph(Graph),Unique)
-
 -- for the example
-import Control.Applicative(pure,liftA2)
-import Data.Reify(MuRef(mapDeRef),DeRef,reifyGraph)
+import           Control.Applicative (liftA2)
+import           Data.Reify (MuRef(mapDeRef), DeRef, reifyGraph)
 
 -- Self-contained Free monad
 data Free f a = Pure a | Free (f (Free f a))
 deriving instance (Show a, Show (f (Free f a))) => Show (Free f a)
-instance (Functor f) => Monad (Free f) where
+
+instance Functor f => Functor (Free f) where
+  fmap f = go where
+    go (Pure a)  = Pure (f a)
+    go (Free fa) = Free (go <$> fa)
+
+instance Functor f => Applicative (Free f) where
+  pure = Pure
+  Pure a <*> Pure b = Pure $ a b
+  Pure a <*> Free mb = Free $ fmap a <$> mb
+  Free ma <*> b = Free $ (<*> b) <$> ma
+
+instance Functor f => Monad (Free f) where
   return = Pure
   Pure a >>= f = f a
   Free m >>= f = Free (fmap (>>= f) m)
@@ -68,7 +83,7 @@ data TreeF a t =
   deriving (Show, Functor, Foldable)
 instance MuRef (Tree a) where
   type DeRef (Tree a) = TreeF a
-  mapDeRef child (Leaf v) = pure $ LeafF v
+  mapDeRef _     (Leaf v) = pure $ LeafF v
   mapDeRef child (Fork l r) = liftA2 ForkF (child l) (child r)
 
 -- An example graph.
@@ -82,6 +97,7 @@ loop1 = Fork (Fork (Leaf 1) loop1) loop2
 -- have a label in the simplified graph only if it is the root.
 loop2 = Fork loop1 (Leaf 2)
 
+main :: IO ()
 main = do
   putStrLn "Simplifed graph for loop1, should have one label"
   print . simpl =<< reifyGraph loop1

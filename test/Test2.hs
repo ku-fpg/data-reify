@@ -1,18 +1,16 @@
 {-# LANGUAGE TypeFamilies #-}
-module Main where
+module Main (main) where
 
+import           Control.Applicative hiding (Const)
+
+import           Data.Reify
 import qualified Data.Traversable as T
-import qualified Data.Foldable as F
-import Data.Monoid
-import Control.Applicative hiding (Const)
-import Data.Unique
-import Data.Reify
-import Control.Monad
 
 -- Notice how there is nothing Mu-ish about this datatype.
 data State a b = State a [(b,State a b)]
         deriving Show
 
+s0, s1, s2 :: State Int Bool
 s0 = State 0 [(True,s1),(False,s2)]
 s1 = State 1 [(True,s0),(False,s1)]
 s2 = State 2 [(True,s1),(False,s0)]
@@ -28,10 +26,8 @@ instance MuRef (State a b) where
 instance Functor (StateDeRef a b) where
    fmap f (StateDeRef a tr) = StateDeRef a [ (b,f s) | (b,s) <- tr ]
 
-
-main = do
-        reifyGraph s0 >>= print
-
+main :: IO ()
+main = reifyGraph s0 >>= print
         
 {- Alt:
 
