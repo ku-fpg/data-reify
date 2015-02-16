@@ -1,20 +1,14 @@
-{-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable, RankNTypes, ExistentialQuantification      #-}
-module Main where
+{-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable,
+             RankNTypes, ExistentialQuantification #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+module Main (main) where
 
-import qualified Data.Traversable as T
-import qualified Data.Foldable as F
-import Data.Monoid
---import Control.Monad
 import Control.Applicative hiding (Const)
 
-import Data.Reify
-import Control.Monad
-import System.CPUTime
-import Data.Typeable
-import Control.Exception as E
-
-
 import Data.Dynamic
+import Data.Reify
+
+import System.CPUTime
 
 data List b = Nil | Cons b b | Int Int | Lambda b b | Var | Add b b
   deriving Show
@@ -22,13 +16,13 @@ data List b = Nil | Cons b b | Int Int | Lambda b b | Var | Add b b
 instance MuRef Int where
   type DeRef Int = List 
 
-  mapDeRef f n = pure $ Int n
+  mapDeRef _ n = pure $ Int n
 
 instance (Typeable a, MuRef a,DeRef [a] ~ DeRef a) => MuRef [a] where
   type DeRef [a] = List 
   
   mapDeRef f (x:xs) = liftA2 Cons (f x) (f xs)
-  mapDeRef f []     = pure Nil
+  mapDeRef _ []     = pure Nil
 
 
 instance NewVar Exp where
@@ -47,8 +41,8 @@ instance Eq Exp where
 instance MuRef Exp where
   type DeRef Exp = List
   
-  mapDeRef f (ExpVar _)   = pure Var
-  mapDeRef f (ExpLit i)   = pure $ Int i
+  mapDeRef _ (ExpVar _)   = pure Var
+  mapDeRef _ (ExpLit i)   = pure $ Int i
   mapDeRef f (ExpAdd x y) = Add <$> f x <*> f y
 
 
@@ -66,13 +60,14 @@ class NewVar a where
   mkVar :: Dynamic -> a
 
 instance Functor (List) where
-   fmap f Nil = Nil
-   fmap f (Cons a b) = Cons (f a) (f b)
-   fmap f (Int n)    = Int n
+   fmap _ Nil          = Nil
+   fmap f (Cons a b)   = Cons (f a) (f b)
+   fmap _ (Int n)      = Int n
    fmap f (Lambda a b) = Lambda (f a) (f b)
-   fmap f Var   = Var
-   fmap f (Add a b) = Add (f a) (f b)
+   fmap _ Var          = Var
+   fmap f (Add a b)    = Add (f a) (f b)
 
+main :: IO ()
 main = do
         let g1 :: [Int]
             g1 = [1..10]
@@ -88,20 +83,23 @@ main = do
         ns <- sequence [ timeme n | n <- take 8 (iterate (*2) 1024) ]
         print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail ns) ]
 
-zz = let xs = [1..3] 
-         ys = (0::Int) : xs
-     in cycle [xs,ys,tail ys]
+-- zz :: [[Int]]
+-- zz = let xs = [1..3] 
+--          ys = (0::Int) : xs
+--      in cycle [xs,ys,tail ys]
+
+timeme :: Int -> IO Float
 timeme n = do
         i <- getCPUTime
         let g3 :: [Int]
             g3 = [1..n] ++ g3
         reifyGraph g3 >>= \ (Graph xs _) -> putStr $ show (length xs)
         j <- getCPUTime
-        let n :: Float
-            n = fromIntegral ((j - i) `div` 1000000000)
-        putStrLn $ " ==> " ++ show (n / 1000)   
-        return n    
+        let n' :: Float
+            n' = fromIntegral ((j - i) `div` 1000000000)
+        putStrLn $ " ==> " ++ show (n' / 1000)   
+        return n'
         
-capture :: (Typeable a, Typeable b, NewVar a) => (a -> b) -> (a,b)
-capture f = (a,f a)
-  where a = mkVar (toDyn f)          
+-- capture :: (Typeable a, Typeable b, NewVar a) => (a -> b) -> (a,b)
+-- capture f = (a,f a)
+--   where a = mkVar (toDyn f)

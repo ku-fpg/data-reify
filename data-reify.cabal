@@ -35,7 +35,8 @@ Copyright:           (c) 2009 Andy Gill
 Homepage:            http://www.ittc.ku.edu/csdl/fpg/Tools/IOReification
 Stability:	     alpha
 build-type: 	     Simple
-Cabal-Version:       >= 1.6
+Cabal-Version:       >= 1.8
+extra-source-files:  CHANGELOG.md, README.md
 
 Flag tests
   Description: Enable full development tree
@@ -50,51 +51,58 @@ Library
   Ghc-Options:  -Wall
 
 Executable data-reify-test1
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test1.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 
 Executable data-reify-test2
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test2.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 Executable data-reify-test3
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test3.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 Executable data-reify-test4
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test4.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 Executable data-reify-test5
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test5.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 Executable data-reify-test6
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test6.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False
 
 Executable data-reify-test7
-  Build-Depends:  base
+  Build-Depends:  base, data-reify
   Main-Is:        Test7.hs
-  Hs-Source-Dirs: ., test
+  Hs-Source-Dirs: test
+  ghc-options:    -Wall
   if !flag(tests)
     buildable: False

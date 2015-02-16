@@ -5,13 +5,15 @@ module Data.Reify (
         reifyGraph
         ) where
 
-import Control.Concurrent.MVar
-import System.Mem.StableName
-import Data.IntMap as M
-import Unsafe.Coerce
-
 import Control.Applicative
+import Control.Concurrent.MVar
+
+import Data.IntMap as M
 import Data.Reify.Graph
+
+import System.Mem.StableName
+
+import Unsafe.Coerce
 
 
 -- | 'MuRef' is a class that provided a way to reference into a specific type,
@@ -78,10 +80,9 @@ hashDynStableName :: DynStableName -> Int
 hashDynStableName (DynStableName sn) = hashStableName sn
 
 instance Eq DynStableName where
-	(DynStableName sn1) == (DynStableName sn2) = sn1 == sn2
+    (DynStableName sn1) == (DynStableName sn2) = sn1 == sn2
 
 makeDynStableName :: a -> IO DynStableName
 makeDynStableName a = do
-	st <- makeStableName a
-	return $ DynStableName (unsafeCoerce st)
-	
+    st <- makeStableName a
+    return $ DynStableName (unsafeCoerce st)
