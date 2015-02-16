@@ -1,11 +1,13 @@
-{-# LANGUAGE  TypeFamilies, RankNTypes #-}
+{-# LANGUAGE CPP, TypeFamilies, RankNTypes #-}
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
         reifyGraph
         ) where
 
+#if !(MIN_VERSION_base(4,8,0))
 import Control.Applicative
+#endif
 import Control.Concurrent.MVar
 
 import Data.IntMap as M
