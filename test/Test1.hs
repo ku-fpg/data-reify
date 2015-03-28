@@ -1,12 +1,12 @@
 {-# LANGUAGE CPP, TypeFamilies #-}
 module Main (main) where
 
-import           Control.Applicative hiding (Const)
-
-import qualified Data.Foldable as F
 #if !(MIN_VERSION_base(4,8,0))
+import           Control.Applicative hiding (Const)
 import           Data.Monoid
 #endif
+
+import qualified Data.Foldable as F
 import           Data.Reify
 import qualified Data.Traversable as T
 

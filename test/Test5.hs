@@ -1,8 +1,10 @@
-{-# LANGUAGE TypeFamilies, DeriveDataTypeable #-}
+{-# LANGUAGE CPP, TypeFamilies, DeriveDataTypeable #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main (main) where
 
+#if !(MIN_VERSION_base(4,8,0))
 import Control.Applicative hiding (Const)
+#endif
 
 import Data.Dynamic
 import Data.Reify

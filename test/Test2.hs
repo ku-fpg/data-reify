@@ -1,7 +1,9 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE CPP, TypeFamilies #-}
 module Main (main) where
 
+#if !(MIN_VERSION_base(4,8,0))
 import           Control.Applicative hiding (Const)
+#endif
 
 import           Data.Reify
 import qualified Data.Traversable as T
