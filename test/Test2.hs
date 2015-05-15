@@ -1,12 +1,12 @@
-{-# LANGUAGE CPP, TypeFamilies #-}
+{-# LANGUAGE TypeFamilies #-}
 module Main (main) where
 
-#if !(MIN_VERSION_base(4,8,0))
 import           Control.Applicative hiding (Const)
-#endif
 
 import           Data.Reify
 import qualified Data.Traversable as T
+
+import           Prelude
 
 -- Notice how there is nothing Mu-ish about this datatype.
 data State a b = State a [(b,State a b)]

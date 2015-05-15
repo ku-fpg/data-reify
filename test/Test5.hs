@@ -1,15 +1,15 @@
-{-# LANGUAGE CPP, TypeFamilies, DeriveDataTypeable #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main (main) where
 
-#if !(MIN_VERSION_base(4,8,0))
 import Control.Applicative hiding (Const)
-#endif
 
 import Data.Dynamic
 import Data.Reify
 
 import System.CPUTime
+
+import Prelude
 
 data List a b = Nil | Cons a b
   deriving Show

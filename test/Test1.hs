@@ -1,14 +1,14 @@
-{-# LANGUAGE CPP, TypeFamilies #-}
+{-# LANGUAGE TypeFamilies #-}
 module Main (main) where
 
-#if !(MIN_VERSION_base(4,8,0))
 import           Control.Applicative hiding (Const)
-import           Data.Monoid
-#endif
 
 import qualified Data.Foldable as F
+import           Data.Monoid
 import           Data.Reify
 import qualified Data.Traversable as T
+
+import           Prelude
 
 newtype Mu a = In (a (Mu a))
 

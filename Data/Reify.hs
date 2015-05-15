@@ -1,13 +1,11 @@
-{-# LANGUAGE CPP, TypeFamilies, RankNTypes #-}
+{-# LANGUAGE TypeFamilies, RankNTypes #-}
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
         reifyGraph
         ) where
 
-#if !(MIN_VERSION_base(4,8,0))
 import Control.Applicative
-#endif
 import Control.Concurrent.MVar
 
 import Data.IntMap as M
@@ -17,6 +15,7 @@ import System.Mem.StableName
 
 import Unsafe.Coerce
 
+import Prelude
 
 -- | 'MuRef' is a class that provided a way to reference into a specific type,
 -- and a way to map over the deferenced internals.

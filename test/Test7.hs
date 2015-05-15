@@ -1,16 +1,16 @@
 {-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable,
-             RankNTypes, ExistentialQuantification, CPP #-}
+             RankNTypes, ExistentialQuantification #-}
 module Main (main) where
 
-#if !(MIN_VERSION_base(4,8,0))
 import Control.Applicative hiding (Const)
-#endif
 
 import Data.Reify
 import Data.Typeable
 
 import System.CPUTime
 import System.Environment
+
+import Prelude
 
 data Tree = Node Tree Tree | Leaf Int
          deriving (Show,Eq,Typeable)
