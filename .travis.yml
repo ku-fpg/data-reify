@@ -52,7 +52,7 @@ install:
    fi
  - travis_retry cabal update -v
  - sed -i 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config
- - cabal install --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt
+ - cabal install -ftests --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt
  - sed -i -e '1,/^Resolving /d' installplan.txt; cat installplan.txt
 
 # check whether current requested install-plan matches cached package-db snapshot
@@ -66,7 +66,7 @@ install:
      echo "cabal build-cache MISS";
      rm -rf $HOME/.cabsnap;
      mkdir -p $HOME/.ghc $HOME/.cabal/lib $HOME/.cabal/share $HOME/.cabal/bin;
-     cabal install -j --only-dependencies --enable-tests --enable-benchmarks;
+     cabal install -j -ftests --only-dependencies --enable-tests --enable-benchmarks;
    fi
 
 # snapshot package-db on cache miss
@@ -83,7 +83,7 @@ install:
 script:
  - if [ -f configure.ac ]; then autoreconf -i; fi
  - cabal configure -ftests --enable-tests --enable-benchmarks -v2  # -v2 provides useful information for debugging
- - cabal build -j1 --ghc-option=-Werror # this builds all libraries and executables (including tests/benchmarks)
+ - cabal build -j1 # this builds all libraries and executables (including tests/benchmarks)
  - cabal check
  - cabal sdist   # tests that a source-distribution can be generated
 
