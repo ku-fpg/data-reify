@@ -1,5 +1,10 @@
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, TypeFamilies,
-      StandaloneDeriving, FlexibleContexts, UndecidableInstances #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-
  This example simplifies a reified graph so only nodes
  referenced from multiple places are assigned labels,
@@ -13,7 +18,7 @@ module Main (main) where
 import           Control.Applicative (Applicative(..))
 import           Data.Foldable (Foldable,foldMap)
 import           Data.Functor ((<$>))
-import           Data.Monoid (Monoid(..), (<>))
+import           Data.Monoid (Monoid(..))
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
 import           Data.Reify (Graph(Graph), Unique)
@@ -22,6 +27,10 @@ import qualified Data.Set as Set
 -- for the example
 import           Control.Applicative (liftA2)
 import           Data.Reify (MuRef(mapDeRef), DeRef, reifyGraph)
+
+#if __GLASGOW_HASKELL__ >= 800
+import           Data.Semigroup (Semigroup(..))
+#endif
 
 -- Self-contained Free monad
 data Free f a = Pure a | Free (f (Free f a))
@@ -48,6 +57,11 @@ newtype Hist a = Hist (Map a Int)
 count :: a -> Hist a
 count x = Hist (Map.singleton x 1)
 
+#if __GLASGOW_HASKELL__ >= 800
+instance (Ord a) => Semigroup (Hist a) where
+  (<>) = mappend
+#endif
+
 instance (Ord a) => Monoid (Hist a) where
   mempty = Hist Map.empty
   mappend (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
@@ -56,7 +70,7 @@ instance (Ord a) => Monoid (Hist a) where
 -- Count the number of times each Unique is referenced
 -- in the graph.
 occs :: (Foldable e) => Graph e -> Hist Unique
-occs (Graph binds root) = count root <> foldMap (foldMap count . snd) binds
+occs (Graph binds root) = count root `mappend` foldMap (foldMap count . snd) binds
 
 -- nest unshared nodes into parents.
 simpl :: (Functor e, Foldable e) => Graph e -> Graph (Free e)
