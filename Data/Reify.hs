@@ -2,13 +2,15 @@
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
-        reifyGraph
+        reifyGraph,
+        reifyGraphs
         ) where
 
 import Control.Applicative
 import Control.Concurrent.MVar
 
 import Data.IntMap as M
+import qualified Data.Set as S
 import Data.Reify.Graph
 
 import System.Mem.StableName
@@ -35,30 +37,58 @@ reifyGraph :: (MuRef s) => s -> IO (Graph (DeRef s))
 reifyGraph m = do rt1 <- newMVar M.empty
                   rt2 <- newMVar []
                   uVar <- newMVar 0
-                  root <- findNodes rt1 rt2 uVar m
-                  pairs <- readMVar rt2
-                  return (Graph pairs root)
+                  reifyWithContext rt1 rt2 uVar m
+
+-- | 'reifyGraphs' takes a 'Traversable' container 't s' of a data structure 's'
+-- admitting 'MuRef', and returns a 't (Graph (DeRef s))' with the graph nodes
+-- resolved within the same context.
+--
+-- This allows for, e.g., a list of mutually recursive structures.
+reifyGraphs :: (MuRef s, Traversable t) => t s -> IO (t (Graph (DeRef s)))
+reifyGraphs coll = do rt1 <- newMVar M.empty
+                      uVar <- newMVar 0
+                      flip traverse coll $ \m -> do
+                        rt2 <- newMVar []
+                        reifyWithContext rt1 rt2 uVar m
+
+reifyWithContext :: (MuRef s)
+          => MVar (IntMap [(DynStableName,Int)])
+          -> MVar [(Int,DeRef s Int)] 
+          -> MVar Int
+          -> s
+          -> IO (Graph (DeRef s))
+reifyWithContext rt1 rt2 uVar j = do
+  root <- findNodes rt1 rt2 uVar S.empty j
+  pairs <- readMVar rt2
+  return (Graph pairs root)
+
 
 findNodes :: (MuRef s) 
           => MVar (IntMap [(DynStableName,Int)])  
           -> MVar [(Int,DeRef s Int)] 
           -> MVar Int
+          -> S.Set Int
           -> s 
           -> IO Int
-findNodes rt1 rt2 uVar j | j `seq` True = do
+findNodes rt1 rt2 uVar nodeSet j | j `seq` True = do
         st <- makeDynStableName j
         tab <- takeMVar rt1
         case mylookup st tab of
           Just var -> do putMVar rt1 tab
-                         return $ var
+                         if var `S.member` nodeSet
+                           then return var
+                           else do res <- mapDeRef (findNodes rt1 rt2 uVar (S.insert var nodeSet)) j
+                                   tab' <- takeMVar rt2
+                                   putMVar rt2 $ (var,res) : tab'
+                                   return var
           Nothing -> 
                     do var <- newUnique uVar
                        putMVar rt1 $ M.insertWith (++) (hashDynStableName st) [(st,var)] tab
-                       res <- mapDeRef (findNodes rt1 rt2 uVar) j
+                       res <- mapDeRef (findNodes rt1 rt2 uVar nodeSet) j
                        tab' <- takeMVar rt2
                        putMVar rt2 $ (var,res) : tab'
                        return var
-findNodes _ _ _ _ = error "findNodes: strictness seq function failed to return True"
+findNodes _ _ _ _ _ = error "findNodes: strictness seq function failed to return True"
 
 mylookup :: DynStableName -> IntMap [(DynStableName,Int)] -> Maybe Int
 mylookup h tab =

@@ -29,7 +29,8 @@ instance Functor (StateDeRef a b) where
    fmap f (StateDeRef a tr) = StateDeRef a [ (b,f s) | (b,s) <- tr ]
 
 main :: IO ()
-main = reifyGraph s0 >>= print
+main = do reifyGraph s0 >>= print
+          reifyGraphs [s0, s1] >>= print
         
 {- Alt:
 
