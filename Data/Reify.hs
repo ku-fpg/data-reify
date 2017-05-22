@@ -1,9 +1,13 @@
-{-# LANGUAGE TypeFamilies, RankNTypes #-}
+{-# LANGUAGE CPP, TypeFamilies, RankNTypes #-}
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
+#if __GLASGOW_HASKELL__ >= 710
         reifyGraph,
         reifyGraphs
+#else
+        reifyGraph
+#endif
         ) where
 
 import Control.Applicative
@@ -39,6 +43,7 @@ reifyGraph m = do rt1 <- newMVar M.empty
                   uVar <- newMVar 0
                   reifyWithContext rt1 rt2 uVar m
 
+#if __GLASGOW_HASKELL__ >= 710
 -- | 'reifyGraphs' takes a 'Traversable' container 't s' of a data structure 's'
 -- admitting 'MuRef', and returns a 't (Graph (DeRef s))' with the graph nodes
 -- resolved within the same context.
@@ -50,6 +55,7 @@ reifyGraphs coll = do rt1 <- newMVar M.empty
                       flip traverse coll $ \m -> do
                         rt2 <- newMVar []
                         reifyWithContext rt1 rt2 uVar m
+#endif
 
 reifyWithContext :: (MuRef s)
           => MVar (IntMap [(DynStableName,Int)])
@@ -84,7 +90,7 @@ findNodes rt1 rt2 uVar nodeSet j | j `seq` True = do
           Nothing -> 
                     do var <- newUnique uVar
                        putMVar rt1 $ M.insertWith (++) (hashDynStableName st) [(st,var)] tab
-                       res <- mapDeRef (findNodes rt1 rt2 uVar nodeSet) j
+                       res <- mapDeRef (findNodes rt1 rt2 uVar (S.insert var nodeSet)) j
                        tab' <- takeMVar rt2
                        putMVar rt2 $ (var,res) : tab'
                        return var
