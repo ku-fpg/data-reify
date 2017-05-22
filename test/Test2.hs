@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE CPP, TypeFamilies #-}
 module Main (main) where
 
 import           Control.Applicative hiding (Const)
@@ -30,7 +30,9 @@ instance Functor (StateDeRef a b) where
 
 main :: IO ()
 main = do reifyGraph s0 >>= print
+#if __GLASGOW_HASKELL__ >= 710
           reifyGraphs [s0, s1] >>= print
+#endif
         
 {- Alt:
 
