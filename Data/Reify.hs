@@ -2,20 +2,19 @@
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
-#if __GLASGOW_HASKELL__ >= 710
         reifyGraph,
         reifyGraphs
-#else
-        reifyGraph
-#endif
         ) where
 
 import Control.Applicative
 import Control.Concurrent.MVar
 
 import Data.IntMap as M
-import qualified Data.Set as S
 import Data.Reify.Graph
+import qualified Data.Set as S
+#if !(MIN_VERSION_base(4,8,0))
+import Data.Traversable
+#endif
 
 import System.Mem.StableName
 
@@ -29,9 +28,9 @@ import Prelude
 class MuRef a where
   type DeRef a :: * -> *
 
-  mapDeRef :: (Applicative f) => 
-              (forall b . (MuRef b, DeRef a ~ DeRef b) => b -> f u) 
-                        -> a 
+  mapDeRef :: (Applicative f) =>
+              (forall b . (MuRef b, DeRef a ~ DeRef b) => b -> f u)
+                        -> a
                         -> f (DeRef a u)
 
 -- | 'reifyGraph' takes a data structure that admits 'MuRef', and returns a 'Graph' that contains
@@ -43,7 +42,6 @@ reifyGraph m = do rt1 <- newMVar M.empty
                   uVar <- newMVar 0
                   reifyWithContext rt1 rt2 uVar m
 
-#if __GLASGOW_HASKELL__ >= 710
 -- | 'reifyGraphs' takes a 'Traversable' container 't s' of a data structure 's'
 -- admitting 'MuRef', and returns a 't (Graph (DeRef s))' with the graph nodes
 -- resolved within the same context.
@@ -55,11 +53,10 @@ reifyGraphs coll = do rt1 <- newMVar M.empty
                       flip traverse coll $ \m -> do
                         rt2 <- newMVar []
                         reifyWithContext rt1 rt2 uVar m
-#endif
 
 reifyWithContext :: (MuRef s)
           => MVar (IntMap [(DynStableName,Int)])
-          -> MVar [(Int,DeRef s Int)] 
+          -> MVar [(Int,DeRef s Int)]
           -> MVar Int
           -> s
           -> IO (Graph (DeRef s))
@@ -69,12 +66,12 @@ reifyWithContext rt1 rt2 uVar j = do
   return (Graph pairs root)
 
 
-findNodes :: (MuRef s) 
-          => MVar (IntMap [(DynStableName,Int)])  
-          -> MVar [(Int,DeRef s Int)] 
+findNodes :: (MuRef s)
+          => MVar (IntMap [(DynStableName,Int)])
+          -> MVar [(Int,DeRef s Int)]
           -> MVar Int
           -> S.Set Int
-          -> s 
+          -> s
           -> IO Int
 findNodes rt1 rt2 uVar nodeSet j | j `seq` True = do
         st <- makeDynStableName j
@@ -87,7 +84,7 @@ findNodes rt1 rt2 uVar nodeSet j | j `seq` True = do
                                    tab' <- takeMVar rt2
                                    putMVar rt2 $ (var,res) : tab'
                                    return var
-          Nothing -> 
+          Nothing ->
                     do var <- newUnique uVar
                        putMVar rt1 $ M.insertWith (++) (hashDynStableName st) [(st,var)] tab
                        res <- mapDeRef (findNodes rt1 rt2 uVar (S.insert var nodeSet)) j
@@ -108,7 +105,7 @@ newUnique var = do
   let v' = succ v
   putMVar var v'
   return v'
-  
+
 -- Stable names that not use phantom types.
 -- As suggested by Ganesh Sittampalam.
 data DynStableName = DynStableName (StableName ())
