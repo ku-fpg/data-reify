@@ -13,17 +13,6 @@ Description:	    'data-reify' provided the ability to turn recursive structures 
                     Providing an instance for 'MuRef' is the mechanism for allowing a structure to be
                     reified into a graph, and several examples of this are provided.
                     .
-                    History:
-                    Version 0.1 used unsafe pointer compares.
-                    Version 0.2 of 'data-reify' used 'StableName's, and was much faster.
-                    Version 0.3 provided two versions of 'MuRef', the mono-typed version,
-                    for trees of a single type,
-                    and the dynamic-typed version, for trees of different types.
-                    Version 0.4 used 'Int' as a synonym for 'Unique' rather than 'Data.Unique'
-                    for node ids, by popular demand.
-                    Version 0.5 merged the mono-typed and dynamic version again, by using
-                    'DynStableName', an unphantomized version of StableName.
-                    .
                     &#169; 2009 Andy Gill; BSD3 license.
 
 Category:            Language, Data, Parsing, Reflection

@@ -1,2 +1,20 @@
 ## 0.6.1
-* Fixed warnings in GHC 7.10
+* Fix warnings in GHC 7.10.
+
+## 0.5
+* Merge the mono-typed and dynamic version again, by using 'DynStableName', an
+  unphantomized version of StableName.
+
+## 0.4
+* Use 'Int' as a synonym for 'Unique' rather than 'Data.Unique' for node ids,
+  by popular demand.
+
+## 0.3
+* Provide two versions of 'MuRef', the mono-typed version, for trees of a
+  single type, and the dynamic-typed version, for trees of different types.
+
+## 0.2
+* Use 'StableName's, making `data-reify` much faster.
+
+## 0.1
+* Use unsafe pointer compares.
