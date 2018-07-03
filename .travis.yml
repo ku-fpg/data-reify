@@ -108,6 +108,8 @@ install:
     fi
   - grep -Ev -- '^\s*--' ${HOME}/.cabal/config | grep -Ev '^\s*$'
   - "printf 'packages: \".\"\\n' > cabal.project"
+  - echo 'package data-reify' >> cabal.project
+  - "echo '  flags: +tests' >> cabal.project"
   - touch cabal.project.local
   - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
@@ -129,6 +131,8 @@ script:
   - cd ${DISTDIR} || false
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
   - "printf 'packages: data-reify-*/*.cabal\\n' > cabal.project"
+  - echo 'package data-reify' >> cabal.project
+  - "echo '  flags: +tests' >> cabal.project"
   - touch cabal.project.local
   - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
