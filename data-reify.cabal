@@ -47,7 +47,7 @@ Flag tests
 
 
 Library
-  Build-Depends: base >= 4 && < 5, containers
+  Build-Depends: base >= 4 && < 5, hashable, containers, unordered-containers
   Exposed-modules:
        Data.Reify,
        Data.Reify.Graph
