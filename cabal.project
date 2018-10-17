@@ -1,1 +1,4 @@
 packages: .
+
+package data-reify
+  flags: +tests
