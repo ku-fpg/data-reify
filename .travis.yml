@@ -117,8 +117,6 @@ install:
   - touch cabal.project
   - |
     echo "packages: ." >> cabal.project
-  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package data-reify' >> cabal.project ; fi
-  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
     echo "package data-reify" >> cabal.project
     echo "  flags: +tests"    >> cabal.project
@@ -145,8 +143,6 @@ script:
   - touch cabal.project
   - |
     echo "packages: ${PKGDIR_data_reify}" >> cabal.project
-  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package data-reify' >> cabal.project ; fi
-  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
     echo "package data-reify" >> cabal.project
     echo "  flags: +tests"    >> cabal.project

@@ -1,3 +1,4 @@
 no-tests-no-benchmarks: False
 unconstrained:          False
 copy-fields:            all
+error-missing-methods:  none
