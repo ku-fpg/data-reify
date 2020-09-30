@@ -1,4 +1,4 @@
-## next [????.??.??]
+## 0.6.2 [2020.09.30]
 * Use `HashMap`s and `IntSet`s internally for slightly better performance.
 
 ## 0.6.1
