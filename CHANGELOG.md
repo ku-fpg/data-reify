@@ -1,3 +1,6 @@
+## next [????.??.??]
+* Use `HashMap`s and `IntSet`s internally for slightly better performance.
+
 ## 0.6.1
 * Fix warnings in GHC 7.10.
 
