@@ -32,7 +32,6 @@ import Data.Traversable
 
 -- | 'MuRef' is a class that provided a way to reference into a specific type,
 -- and a way to map over the deferenced internals.
-
 class MuRef a where
   type DeRef a :: * -> *
 
@@ -43,12 +42,10 @@ class MuRef a where
 
 -- | 'reifyGraph' takes a data structure that admits 'MuRef', and returns a 'Graph' that contains
 -- the dereferenced nodes, with their children as 'Unique's rather than recursive values.
-
 reifyGraph :: (MuRef s) => s -> IO (Graph (DeRef s))
 reifyGraph m = do rt1 <- newMVar HM.empty
-                  rt2 <- newMVar []
                   uVar <- newMVar 0
-                  reifyWithContext rt1 rt2 uVar m
+                  reifyWithContext rt1 uVar m
 
 -- | 'reifyGraphs' takes a 'Traversable' container 't s' of a data structure 's'
 -- admitting 'MuRef', and returns a 't (Graph (DeRef s))' with the graph nodes
@@ -58,46 +55,69 @@ reifyGraph m = do rt1 <- newMVar HM.empty
 reifyGraphs :: (MuRef s, Traversable t) => t s -> IO (t (Graph (DeRef s)))
 reifyGraphs coll = do rt1 <- newMVar HM.empty
                       uVar <- newMVar 0
-                      flip traverse coll $ \m -> do
-                        rt2 <- newMVar []
-                        reifyWithContext rt1 rt2 uVar m
+                      traverse (reifyWithContext rt1 uVar) coll
+                        -- NB: We deliberately reuse the same map of stable
+                        -- names and unique supply across all iterations of the
+                        -- traversal to ensure that the same context is used
+                        -- when reifying all elements of the container.
 
+-- Reify a data structure's 'Graph' using the supplied map of stable names and
+-- unique supply.
 reifyWithContext :: (MuRef s)
-          => MVar (HashMap DynStableName Unique)
-          -> MVar [(Unique,DeRef s Unique)]
-          -> MVar Unique
-          -> s
-          -> IO (Graph (DeRef s))
-reifyWithContext rt1 rt2 uVar j = do
-  root <- findNodes rt1 rt2 uVar IS.empty j
+                 => MVar (HashMap DynStableName Unique)
+                 -> MVar Unique
+                 -> s
+                 -> IO (Graph (DeRef s))
+reifyWithContext rt1 uVar j = do
+  rt2 <- newMVar []
+  nodeSetVar <- newMVar IS.empty
+  root <- findNodes rt1 rt2 uVar nodeSetVar j
   pairs <- readMVar rt2
   return (Graph pairs root)
 
+-- The workhorse for 'reifyGraph' and 'reifyGraphs'.
 findNodes :: (MuRef s)
           => MVar (HashMap DynStableName Unique)
+             -- ^ A map of stable names to unique numbers.
+             --   Invariant: all 'Uniques' that appear in the range are less
+             --   than the current value in the unique name supply.
           -> MVar [(Unique,DeRef s Unique)]
+             -- ^ The key-value pairs in the 'Graph' that is being built.
+             --   Invariant 1: the domain of this association list is a subset
+             --   of the range of the map of stable names.
+             --   Invariant 2: the domain of this association list will never
+             --   contain duplicate keys.
           -> MVar Unique
-          -> IntSet
+             -- ^ A supply of unique names.
+          -> MVar IntSet
+             -- ^ The unique numbers that we have encountered so far.
+             --   Invariant: this set is a subset of the range of the map of
+             --   stable names.
           -> s
+             -- ^ The value for which we will reify a 'Graph'.
           -> IO Unique
-findNodes rt1 rt2 uVar nodeSet !j = do
+             -- ^ The unique number for the value above.
+findNodes rt1 rt2 uVar nodeSetVar !j = do
         st <- makeDynStableName j
         tab <- takeMVar rt1
+        nodeSet <- takeMVar nodeSetVar
         case HM.lookup st tab of
           Just var -> do putMVar rt1 tab
                          if var `IS.member` nodeSet
-                           then return var
-                           else do res <- mapDeRef (findNodes rt1 rt2 uVar (IS.insert var nodeSet)) j
-                                   tab' <- takeMVar rt2
-                                   putMVar rt2 $ (var,res) : tab'
+                           then do putMVar nodeSetVar nodeSet
                                    return var
-          Nothing ->
-                    do var <- newUnique uVar
-                       putMVar rt1 $ HM.insert st var tab
-                       res <- mapDeRef (findNodes rt1 rt2 uVar (IS.insert var nodeSet)) j
-                       tab' <- takeMVar rt2
-                       putMVar rt2 $ (var,res) : tab'
-                       return var
+                           else recurse var nodeSet
+          Nothing -> do var <- newUnique uVar
+                        putMVar rt1 $ HM.insert st var tab
+                        recurse var nodeSet
+  where
+    recurse :: Unique -> IntSet -> IO Unique
+    recurse var nodeSet = do
+      putMVar nodeSetVar $ IS.insert var nodeSet
+      res <- mapDeRef (findNodes rt1 rt2 uVar nodeSetVar) j
+      tab' <- takeMVar rt2
+      putMVar rt2 $ (var,res) : tab'
+      return var
 
 newUnique :: MVar Unique -> IO Unique
 newUnique var = do
