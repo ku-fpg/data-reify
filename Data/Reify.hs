@@ -42,7 +42,7 @@ class MuRef a where
                         -> f (DeRef a u)
 
 -- | 'reifyGraph' takes a data structure that admits 'MuRef', and returns a 'Graph' that contains
--- the dereferenced nodes, with their children as 'Int' rather than recursive values.
+-- the dereferenced nodes, with their children as 'Unique's rather than recursive values.
 
 reifyGraph :: (MuRef s) => s -> IO (Graph (DeRef s))
 reifyGraph m = do rt1 <- newMVar HM.empty
@@ -63,9 +63,9 @@ reifyGraphs coll = do rt1 <- newMVar HM.empty
                         reifyWithContext rt1 rt2 uVar m
 
 reifyWithContext :: (MuRef s)
-          => MVar (HashMap DynStableName Int)
-          -> MVar [(Int,DeRef s Int)]
-          -> MVar Int
+          => MVar (HashMap DynStableName Unique)
+          -> MVar [(Unique,DeRef s Unique)]
+          -> MVar Unique
           -> s
           -> IO (Graph (DeRef s))
 reifyWithContext rt1 rt2 uVar j = do
@@ -74,12 +74,12 @@ reifyWithContext rt1 rt2 uVar j = do
   return (Graph pairs root)
 
 findNodes :: (MuRef s)
-          => MVar (HashMap DynStableName Int)
-          -> MVar [(Int,DeRef s Int)]
-          -> MVar Int
+          => MVar (HashMap DynStableName Unique)
+          -> MVar [(Unique,DeRef s Unique)]
+          -> MVar Unique
           -> IntSet
           -> s
-          -> IO Int
+          -> IO Unique
 findNodes rt1 rt2 uVar nodeSet !j = do
         st <- makeDynStableName j
         tab <- takeMVar rt1
@@ -99,7 +99,7 @@ findNodes rt1 rt2 uVar nodeSet !j = do
                        putMVar rt2 $ (var,res) : tab'
                        return var
 
-newUnique :: MVar Int -> IO Int
+newUnique :: MVar Unique -> IO Unique
 newUnique var = do
   v <- takeMVar var
   let v' = succ v

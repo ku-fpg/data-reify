@@ -30,7 +30,7 @@ data Graph e = Graph [(Unique,e Unique)] Unique
 type Unique = Int
 
 -- | If 'e' is s Functor, and 'e' is 'Show'-able, then we can 'Show' a 'Graph'.
-instance (Show (e Int)) => Show (Graph e) where
+instance (Show (e Unique)) => Show (Graph e) where
   show (Graph netlist start) = "let " ++ show [ (u,e)
                                               | (u,e) <- netlist
                                               ] ++ " in " ++ show start
