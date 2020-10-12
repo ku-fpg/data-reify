@@ -1,4 +1,4 @@
-## next [????.??.??]
+## 0.6.3 [2020.10.12]
 * Fix a bug introduced in `data-reify-0.6.2` where `reifyGraph` could return
   `Graph`s with duplicate key-value pairs.
 
