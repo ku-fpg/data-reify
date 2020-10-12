@@ -1,3 +1,7 @@
+## next [????.??.??]
+* Fix a bug introduced in `data-reify-0.6.2` where `reifyGraph` could return
+  `Graph`s with duplicate key-value pairs.
+
 ## 0.6.2 [2020.09.30]
 * Use `HashMap`s and `IntSet`s internally for slightly better performance.
 
