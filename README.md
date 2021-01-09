@@ -1,4 +1,4 @@
-# data-reify [![Hackage version](https://img.shields.io/hackage/v/data-reify.svg?style=flat)](http://hackage.haskell.org/package/data-reify) [![Build Status](https://img.shields.io/travis/ku-fpg/data-reify.svg?style=flat)](https://travis-ci.org/ku-fpg/data-reify)
+# data-reify [![Hackage version](https://img.shields.io/hackage/v/data-reify.svg?style=flat)](http://hackage.haskell.org/package/data-reify) [![Build Status](https://github.com/ku-fpg/data-reify/workflows/Haskell-CI/badge.svg)](https://github.com/ku-fpg/data-reify/actions?query=workflow%3AHaskell-CI)
 
 `data-reify` provided the ability to turn recursive structures into explicit graphs. Many (implicitly or explicitly) recursive data structure can be given this ability, via a type class instance. This gives an alternative to using `Ref` for observable sharing.
 
