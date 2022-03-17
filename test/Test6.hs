@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable,
-             RankNTypes, ExistentialQuantification #-}
+             RankNTypes, ExistentialQuantification, TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main (main) where
 
@@ -14,13 +14,13 @@ data List b = Nil | Cons b b | Int Int | Lambda b b | Var | Add b b
   deriving Show
 
 instance MuRef Int where
-  type DeRef Int = List 
+  type DeRef Int = List
 
   mapDeRef _ n = pure $ Int n
 
 instance (Typeable a, MuRef a,DeRef [a] ~ DeRef a) => MuRef [a] where
-  type DeRef [a] = List 
-  
+  type DeRef [a] = List
+
   mapDeRef f (x:xs) = liftA2 Cons (f x) (f xs)
   mapDeRef _ []     = pure Nil
 
@@ -31,16 +31,16 @@ instance NewVar Exp where
 
 data Exp = ExpVar Dynamic | ExpLit Int | ExpAdd Exp Exp
   deriving (Typeable, Show)
-  
-  
+
+
 instance Eq Exp where
     _ == _ = False
-    
+
 -- instance Eq Dynamic where { a == b = False }
 
 instance MuRef Exp where
   type DeRef Exp = List
-  
+
   mapDeRef _ (ExpVar _)   = pure Var
   mapDeRef _ (ExpLit i)   = pure $ Int i
   mapDeRef f (ExpAdd x y) = Add <$> f x <*> f y
@@ -49,11 +49,11 @@ instance MuRef Exp where
 instance Num Exp where
     (+) = ExpAdd
     fromInteger n = ExpLit (fromInteger n)
-    
+
 instance (MuRef a,Typeable a, NewVar a, Typeable b, MuRef b, DeRef a ~ DeRef (a -> b),DeRef b ~ DeRef (a -> b)) => MuRef (a -> b) where
   type DeRef (a -> b) = List
 
-  mapDeRef f fn = let v = mkVar $ toDyn fn 
+  mapDeRef f fn = let v = mkVar $ toDyn fn
                   in Lambda <$> f v <*> f (fn v)
 
 class NewVar a where
@@ -78,13 +78,13 @@ main = do
 
         let g3 = [\ x -> x :: Exp, \ y -> y + head g3 2] ++ g3
         reifyGraph g3 >>= print
-        
+
         -- now, some timings.
         ns <- sequence [ timeme n | n <- take 8 (iterate (*2) 1024) ]
         print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail ns) ]
 
 -- zz :: [[Int]]
--- zz = let xs = [1..3] 
+-- zz = let xs = [1..3]
 --          ys = (0::Int) : xs
 --      in cycle [xs,ys,tail ys]
 
@@ -97,9 +97,9 @@ timeme n = do
         j <- getCPUTime
         let n' :: Float
             n' = fromIntegral ((j - i) `div` 1000000000)
-        putStrLn $ " ==> " ++ show (n' / 1000)   
+        putStrLn $ " ==> " ++ show (n' / 1000)
         return n'
-        
+
 -- capture :: (Typeable a, Typeable b, NewVar a) => (a -> b) -> (a,b)
 -- capture f = (a,f a)
 --   where a = mkVar (toDyn f)

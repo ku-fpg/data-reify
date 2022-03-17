@@ -3,6 +3,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 module Data.Reify (
         MuRef(..),
         module Data.Reify.Graph,
