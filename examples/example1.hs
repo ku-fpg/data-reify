@@ -1,18 +1,24 @@
 {-# LANGUAGE TypeFamilies, DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
-import Control.Applicative
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
+module Main(DistF,Dist,D,share,expand,main) where
+
+
 import Data.Reify
 import Data.Traversable
 import System.FilePath
 import Data.IntMap as IntMap
 import Data.Foldable
 import Data.Monoid
+import Control.Applicative
 
 {-
 This example was written by Edward Kmett for Johan Tibell,
 and can be found at http://lpaste.net/74064
 
 -}
-
+main :: IO ()
+main = print "example1"
 
 data DistF a
   = ConcatF [a]
@@ -42,7 +48,7 @@ share :: Dist a -> IO (IntMap D, D)
 share d = do
   Graph nodes s <- reifyGraph d
   let universe = IntMap.fromList nodes
-      refs = insertWith (+) s 1 $ Prelude.foldr (\k -> insertWith (+) (fst k) 1) mempty nodes
+      refs = insertWith (+) s (1::Integer) $ Prelude.foldr (\k -> insertWith (+) (fst k) 1) mempty nodes
       (urefs, mrefs) = IntMap.partition (==1) refs
       lut = intersectionWith const universe urefs
   return (mapWithKey (\k _ -> expand lut k) mrefs, expand lut s)
