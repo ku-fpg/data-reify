@@ -49,7 +49,9 @@ instance Functor f => Applicative (Free f) where
   Free ma <*> b = Free $ (<*> b) <$> ma
 
 instance Functor f => Monad (Free f) where
+#if __GLASGOW_HASKELL__ < 904  
   return = Pure
+#endif   
   Pure a >>= f = f a
   Free m >>= f = Free (fmap (>>= f) m)
 
@@ -60,12 +62,16 @@ count x = Hist (Map.singleton x 1)
 
 #if __GLASGOW_HASKELL__ >= 800
 instance (Ord a) => Semigroup (Hist a) where
-  (<>) = mappend
+  (<>) (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
 #endif
 
 instance (Ord a) => Monoid (Hist a) where
   mempty = Hist Map.empty
+#if __GLASGOW_HASKELL__ < 800  
   mappend (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
+#else
+  mappend = (<>)
+#endif   
   mconcat hists = Hist (Map.unionsWith (+) [m | Hist m <- hists])
 
 -- Count the number of times each Unique is referenced
@@ -83,6 +89,7 @@ simpl g@(Graph binds root) =
         | otherwise =
             case lookup ix binds of
               Just pat -> Free (fmap grow pat)
+              Nothing -> error "this shouldn't happen"
   in Graph [(k, Free (fmap grow v))
            | (k,v) <- binds, Set.member k repeated]
      root
