@@ -15,21 +15,32 @@
 module Main (main) where
 
 -- to define simplification
-import           Control.Applicative (Applicative(..))
-import           Data.Foldable (Foldable,foldMap)
-import           Data.Functor ((<$>))
-import           Data.Monoid (Monoid(..))
+#if MIN_VERSION_containers(0,5,0)
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
+#else
+import qualified Data.Map as Map
+import           Data.Map (Map)
+#endif
 import           Data.Reify (Graph(Graph), Unique)
 import qualified Data.Set as Set
 
 -- for the example
-import           Control.Applicative (liftA2)
 import           Data.Reify (MuRef(mapDeRef), DeRef, reifyGraph)
 
-#if __GLASGOW_HASKELL__ >= 800
+#if !(MIN_VERSION_base(4,8,0))
+import           Control.Applicative (Applicative(..))
+import           Data.Foldable (Foldable,foldMap)
+import           Data.Functor ((<$>))
+import           Data.Monoid (Monoid(..))
+#endif
+
+#if MIN_VERSION_base(4,9,0) && !(MIN_VERSION_base(4,11,0))
 import           Data.Semigroup (Semigroup(..))
+#endif
+
+#if !(MIN_VERSION_base(4,18,0))
+import           Control.Applicative (liftA2)
 #endif
 
 -- Self-contained Free monad
@@ -48,7 +59,9 @@ instance Functor f => Applicative (Free f) where
   Free ma <*> b = Free $ (<*> b) <$> ma
 
 instance Functor f => Monad (Free f) where
+#if !(MIN_VERSION_base(4,11,0))
   return = Pure
+#endif
   Pure a >>= f = f a
   Free m >>= f = Free (fmap (>>= f) m)
 
@@ -59,12 +72,14 @@ count x = Hist (Map.singleton x 1)
 
 #if __GLASGOW_HASKELL__ >= 800
 instance (Ord a) => Semigroup (Hist a) where
-  (<>) = mappend
+  (<>) (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
 #endif
 
 instance (Ord a) => Monoid (Hist a) where
   mempty = Hist Map.empty
+#if !(MIN_VERSION_base(4,11,0))
   mappend (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
+#endif
   mconcat hists = Hist (Map.unionsWith (+) [m | Hist m <- hists])
 
 -- Count the number of times each Unique is referenced
@@ -82,6 +97,7 @@ simpl g@(Graph binds root) =
         | otherwise =
             case lookup ix binds of
               Just pat -> Free (fmap grow pat)
+              Nothing -> error "this shouldn't happen"
   in Graph [(k, Free (fmap grow v))
            | (k,v) <- binds, Set.member k repeated]
      root
