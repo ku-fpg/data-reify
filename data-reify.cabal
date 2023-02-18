@@ -74,7 +74,7 @@ test-suite spec
   ghc-options:         -Wall -threaded -rtsopts
 
 Executable example1
-  Build-Depends:  base, data-reify,containers
+  Build-Depends:  base, containers, data-reify
   Main-Is:        example1.hs
   Hs-Source-Dirs: examples
   ghc-options:    -Wall
@@ -83,13 +83,14 @@ Executable example1
     buildable: False
 
 Executable simplify
-  Build-Depends:  base, data-reify,containers
+  Build-Depends:  base, containers, data-reify
   Main-Is:        simplify.hs
   Hs-Source-Dirs: examples
   ghc-options:    -Wall
   default-language: Haskell2010
   if !flag(tests)
     buildable: False
+
 Executable data-reify-test1
   Build-Depends:  base, data-reify
   Main-Is:        Test1.hs
@@ -98,7 +99,6 @@ Executable data-reify-test1
   default-language: Haskell2010
   if !flag(tests)
     buildable: False
-
 
 Executable data-reify-test2
   Build-Depends:  base, data-reify
