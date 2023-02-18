@@ -1,16 +1,16 @@
-{-# LANGUAGE TypeFamilies, DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# LANGUAGE CPP, TypeFamilies, DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 
 module Main(DistF,Dist,D,share,expand,main) where
 
-
 import Data.Reify
-import Data.Traversable
-import System.FilePath
 import Data.IntMap as IntMap
+
+#if !(MIN_VERSION_base(4,8,0))
+import Control.Applicative
 import Data.Foldable
 import Data.Monoid
-import Control.Applicative
+import Data.Traversable
+#endif
 
 {-
 This example was written by Edward Kmett for Johan Tibell,

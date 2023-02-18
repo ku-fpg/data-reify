@@ -5,7 +5,6 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -Wno-unused-imports #-}
 {-
  This example simplifies a reified graph so only nodes
  referenced from multiple places are assigned labels,
@@ -16,21 +15,27 @@
 module Main (main) where
 
 -- to define simplification
-import           Control.Applicative (Applicative(..))
-import           Data.Foldable (Foldable,foldMap)
-import           Data.Functor ((<$>))
-import           Data.Monoid (Monoid(..))
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
 import           Data.Reify (Graph(Graph), Unique)
 import qualified Data.Set as Set
 
 -- for the example
-import           Control.Applicative (liftA2)
 import           Data.Reify (MuRef(mapDeRef), DeRef, reifyGraph)
 
-#if __GLASGOW_HASKELL__ >= 800
+#if !(MIN_VERSION_base(4,8,0))
+import           Control.Applicative (Applicative(..))
+import           Data.Foldable (Foldable,foldMap)
+import           Data.Functor ((<$>))
+import           Data.Monoid (Monoid(..))
+#endif
+
+#if MIN_VERSION_base(4,9,0) && !(MIN_VERSION_base(4,11,0))
 import           Data.Semigroup (Semigroup(..))
+#endif
+
+#if !(MIN_VERSION_base(4,18,0))
+import           Control.Applicative (liftA2)
 #endif
 
 -- Self-contained Free monad
@@ -49,9 +54,9 @@ instance Functor f => Applicative (Free f) where
   Free ma <*> b = Free $ (<*> b) <$> ma
 
 instance Functor f => Monad (Free f) where
-#if __GLASGOW_HASKELL__ < 904  
+#if !(MIN_VERSION_base(4,11,0))
   return = Pure
-#endif   
+#endif
   Pure a >>= f = f a
   Free m >>= f = Free (fmap (>>= f) m)
 
@@ -67,11 +72,9 @@ instance (Ord a) => Semigroup (Hist a) where
 
 instance (Ord a) => Monoid (Hist a) where
   mempty = Hist Map.empty
-#if __GLASGOW_HASKELL__ < 800  
+#if !(MIN_VERSION_base(4,11,0))
   mappend (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
-#else
-  mappend = (<>)
-#endif   
+#endif
   mconcat hists = Hist (Map.unionsWith (+) [m | Hist m <- hists])
 
 -- Count the number of times each Unique is referenced
