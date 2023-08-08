@@ -3,6 +3,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main (main) where
 
+import Common
+
 import Control.Applicative hiding (Const)
 
 import Data.Dynamic
@@ -76,12 +78,12 @@ main = do
             g2 = [1..10] ++ g2
         reifyGraph g2 >>= print
 
-        let g3 = [\ x -> x :: Exp, \ y -> y + head g3 2] ++ g3
+        let g3 = [\ x -> x :: Exp, \ y -> y + head_ g3 2] ++ g3
         reifyGraph g3 >>= print
 
         -- now, some timings.
         ns <- sequence [ timeme n | n <- take 8 (iterate (*2) 1024) ]
-        print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail ns) ]
+        print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail_ ns) ]
 
 -- zz :: [[Int]]
 -- zz = let xs = [1..3]

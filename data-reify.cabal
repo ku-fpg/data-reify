@@ -121,7 +121,8 @@ Executable data-reify-test3
 Executable data-reify-test4
   Build-Depends:  base, data-reify
   Main-Is:        Test4.hs
-  Hs-Source-Dirs: test
+  other-modules:  Common
+  Hs-Source-Dirs: test, test-common
   ghc-options:    -Wall
   default-language: Haskell2010
   if !flag(tests)
@@ -130,7 +131,8 @@ Executable data-reify-test4
 Executable data-reify-test5
   Build-Depends:  base, data-reify
   Main-Is:        Test5.hs
-  Hs-Source-Dirs: test
+  other-modules:  Common
+  Hs-Source-Dirs: test, test-common
   ghc-options:    -Wall
   default-language: Haskell2010
   if !flag(tests)
@@ -139,7 +141,8 @@ Executable data-reify-test5
 Executable data-reify-test6
   Build-Depends:  base, data-reify
   Main-Is:        Test6.hs
-  Hs-Source-Dirs: test
+  other-modules:  Common
+  Hs-Source-Dirs: test, test-common
   ghc-options:    -Wall
   default-language: Haskell2010
   if !flag(tests)

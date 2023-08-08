@@ -2,6 +2,8 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main (main) where
 
+import Common
+
 import Control.Applicative hiding (Const)
 
 import Data.Dynamic
@@ -15,7 +17,7 @@ data List a b = Nil | Cons a b
   deriving Show
 
 instance Typeable a => MuRef [a] where
-  type DeRef [a] = List a 
+  type DeRef [a] = List a
 
   mapDeRef f (x:xs) = Cons x <$> f xs
   mapDeRef _ []     = pure Nil
@@ -34,7 +36,7 @@ main = do
 
         -- now, some timings.
         ns <- sequence [ timeme n | n <- take 8 (iterate (*2) 1024) ]
-        print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail ns) ]
+        print $ reverse $ take 4 $ reverse [ n2 / n1 | (n1,n2) <- zip ns (tail_ ns) ]
 
 timeme :: Int -> IO Float
 timeme n = do
@@ -44,5 +46,5 @@ timeme n = do
         j <- getCPUTime
         let n' :: Float
             n' = fromIntegral ((j - i) `div` 1000000000)
-        putStrLn $ " ==> " ++ show (n' / 1000)   
+        putStrLn $ " ==> " ++ show (n' / 1000)
         return n'
