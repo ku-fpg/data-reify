@@ -2,3 +2,6 @@ no-tests-no-benchmarks: False
 unconstrained:          False
 copy-fields:            all
 error-missing-methods:  none
+-- For reasons I don't fully understand, the Haddock bundled with pre-8.2
+-- versions of GHC will fail to parse the code in the test suite.
+haddock:                >=8.2
