@@ -1,5 +1,5 @@
 Name:               data-reify
-Version:            0.6.3
+Version:            0.6.4
 Synopsis:           Reify a recursive data structure into an explicit graph.
 Description:	    'data-reify' provided the ability to turn recursive structures into explicit graphs.
                     Many (implicitly or explicitly) recursive data structure can be given this ability, via
