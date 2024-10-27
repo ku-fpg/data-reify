@@ -1,13 +1,11 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Data.ReifySpec where
 
 import qualified Data.List as L
 import Data.Reify
-import Prelude ()
-import Prelude.Compat
 import Test.Hspec
 
 main :: IO ()

@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -21,15 +20,6 @@ import qualified Data.IntSet as IS
 import Data.IntSet (IntSet)
 
 import System.Mem.StableName
-
-#if !(MIN_VERSION_base(4,7,0))
-import Unsafe.Coerce
-#endif
-
-#if !(MIN_VERSION_base(4,8,0))
-import Control.Applicative
-import Data.Traversable
-#endif
 
 -- | 'MuRef' is a class that provided a way to reference into a specific type,
 -- and a way to map over the deferenced internals.
@@ -139,11 +129,7 @@ instance Hashable DynStableName where
 
 instance Eq DynStableName where
   DynStableName m == DynStableName n =
-#if MIN_VERSION_base(4,7,0)
     eqStableName m n
-#else
-    m == unsafeCoerce n
-#endif
 
 makeDynStableName :: a -> IO DynStableName
 makeDynStableName a = do

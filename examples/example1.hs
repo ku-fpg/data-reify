@@ -1,16 +1,9 @@
-{-# LANGUAGE CPP, TypeFamilies, DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
+{-# LANGUAGE TypeFamilies, DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 
 module Main (DistF,Dist,D,share,expand,main) where
 
 import Data.Reify
 import Data.IntMap as IntMap
-
-#if !(MIN_VERSION_base(4,8,0))
-import Control.Applicative
-import Data.Foldable
-import Data.Monoid
-import Data.Traversable
-#endif
 
 {-
 This example was written by Edward Kmett for Johan Tibell,

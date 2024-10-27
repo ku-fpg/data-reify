@@ -1,11 +1,10 @@
-{-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable,
+{-# LANGUAGE TypeFamilies, UndecidableInstances,
              RankNTypes, ExistentialQuantification #-}
 module Main (main) where
 
 import Control.Applicative hiding (Const)
 
 import Data.Reify
-import Data.Typeable
 
 import System.CPUTime
 import System.Environment
@@ -13,7 +12,7 @@ import System.Environment
 import Prelude
 
 data Tree = Node Tree Tree | Leaf Int
-         deriving (Show,Eq,Typeable)
+         deriving (Show,Eq)
 
 data T s = N s s | L Int
 
@@ -42,14 +41,14 @@ timeme :: Int -> (Int -> Tree) -> IO Float
 timeme n f = do
         i <- getCPUTime
         let g3 :: Tree
-            g3 = f n 
+            g3 = f n
         reifyGraph g3 >>= \ (Graph xs _) -> putStr $ show (length xs)
         j <- getCPUTime
         let t :: Float
             t = fromIntegral ((j - i) `div` 1000000000)
-        putStrLn $ " " ++ show n ++ " ==> " ++ show (t / 1000)   
+        putStrLn $ " " ++ show n ++ " ==> " ++ show (t / 1000)
         return t
-        
+
 main :: IO ()
 main = do
   (x:args) <- getArgs

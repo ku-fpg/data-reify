@@ -15,27 +15,15 @@
 module Main (main) where
 
 -- to define simplification
-#if MIN_VERSION_containers(0,5,0)
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
-#else
-import qualified Data.Map as Map
-import           Data.Map (Map)
-#endif
 import           Data.Reify (Graph(Graph), Unique)
 import qualified Data.Set as Set
 
 -- for the example
 import           Data.Reify (MuRef(mapDeRef), DeRef, reifyGraph)
 
-#if !(MIN_VERSION_base(4,8,0))
-import           Control.Applicative (Applicative(..))
-import           Data.Foldable (Foldable,foldMap)
-import           Data.Functor ((<$>))
-import           Data.Monoid (Monoid(..))
-#endif
-
-#if MIN_VERSION_base(4,9,0) && !(MIN_VERSION_base(4,11,0))
+#if !(MIN_VERSION_base(4,11,0))
 import           Data.Semigroup (Semigroup(..))
 #endif
 
@@ -70,10 +58,8 @@ newtype Hist a = Hist (Map a Int)
 count :: a -> Hist a
 count x = Hist (Map.singleton x 1)
 
-#if __GLASGOW_HASKELL__ >= 800
 instance (Ord a) => Semigroup (Hist a) where
   (<>) (Hist m1) (Hist m2) = Hist (Map.unionWith (+) m1 m2)
-#endif
 
 instance (Ord a) => Monoid (Hist a) where
   mempty = Hist Map.empty

@@ -1,6 +1,6 @@
-{-# LANGUAGE TypeFamilies, UndecidableInstances, DeriveDataTypeable,
+{-# LANGUAGE TypeFamilies, UndecidableInstances,
              RankNTypes, ExistentialQuantification, TypeOperators #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Main (main) where
 
 import Common
@@ -32,7 +32,7 @@ instance NewVar Exp where
 --          return $ Var $ toDyn fn
 
 data Exp = ExpVar Dynamic | ExpLit Int | ExpAdd Exp Exp
-  deriving (Typeable, Show)
+  deriving Show
 
 
 instance Eq Exp where
